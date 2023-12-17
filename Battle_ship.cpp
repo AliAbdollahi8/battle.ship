@@ -1,0 +1,535 @@
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
+#include <cstring>
+#include <stdlib.h>
+#include <windows.h>
+
+
+void enter_ship(int ship_m[10], int ship_s[10] , char ship_g[10] , char AorB)
+{
+	int n1=0 , n2=0 , n3=0 , n4=0;
+	printf("enter player %c ships in 10 lines. each line includes these:\n start spot(from 0 to 99)\n size from(1 to 4)\n and direction of the ships (U, R , D , L)\n for example: 11 3 R \n" , AorB);
+	while(1)
+	{
+		int error=0;
+		int temp_ship_m[10];
+		int temp_ship_s[10];
+		char temp_ship_g[10];
+		
+		for( int i=0;i<=9;i++)
+		{
+			printf("ship number %d:\t" , i+1);
+			scanf("%d" , &temp_ship_m[i]);
+			scanf("%d" , &temp_ship_s[i]);
+			scanf("%s" , &temp_ship_g[i]);	
+		}
+		for(int j=0;j<=9;j++)
+		{
+			if ((temp_ship_m[j]<0)||(temp_ship_m[j]>99))
+			{
+				error = 1;
+			}
+			if ((temp_ship_s[j]<1)||(temp_ship_s[j]>4))
+			{
+				error = 1;
+			}
+			if ((temp_ship_g[j]!='U')&&(temp_ship_g[j]!='R')&&(temp_ship_g[j]!='D')&&(temp_ship_g[j]!='L'))
+			{
+				error =1;
+			}	
+			if(temp_ship_s[j]==1)
+			{
+				n1=n1+1;
+			}
+				if(temp_ship_s[j]==2)
+			{
+				n2=n2+1;
+			}
+				if(temp_ship_s[j]==3)
+			{
+				n3=n3+1;
+			}
+				if(temp_ship_s[j]==4)
+			{
+				n4=n4+1;
+			}	
+		}
+		if(n1!=4)
+			{
+				error=1;
+			}
+		if(n2!=3)
+			{
+				error=1;
+			}
+		if(n3!=2)
+			{
+				error=1;
+			}
+		if(n4!=1)
+			{
+				error=1;
+			}
+		if(error==1)
+			{
+				printf("wrong input , please enter valid value!\n");
+				continue;
+			}
+		else if(error==0)
+		{
+			for(int i=0;i<=9;i++)
+			{
+				ship_m[i] = temp_ship_m[i];
+			}
+			for(int i=0;i<=9;i++)
+			{
+				ship_s[i] = temp_ship_s[i];
+			}
+			for(int i=0;i<=9;i++)
+			{
+				ship_g[i] = temp_ship_g[i];
+			}
+		}
+		break;
+    }
+}
+
+
+
+void clear_map(char map[100] , char AorB)
+{
+	for(int i=0;i<=99;i++)
+	{
+		map[i]='-';
+	}
+}
+
+
+
+void insert_ship_in_map(int ship_m[10], int ship_s[10] , char ship_g[10] , char map[100] , char AorB)
+{
+	for (int i = 0 ; i<=9 ; i++)
+	{
+		int g = ship_g[i];
+		int size = ship_s[i];
+		if(g==85)
+		{
+			for(int j=0;j<size;j++)
+			{
+				map[ship_m[i]-(j*10)]='S';
+			}
+		}
+		if(g==68)
+		{
+			for(int j=0;j<size;j++)
+			{
+				map[ship_m[i]+(j*10)]='S';
+			}
+		}
+		if(g==82)
+		{
+			for(int j=0;j<size;j++)
+			{
+				map[ship_m[i]+(j*1)]='S';
+			}
+		}
+		if(g==76)
+		{
+			for(int j=0;j<size;j++)
+			{
+				map[ship_m[i]-(j*1)]='S';
+			}
+		}
+	}
+	
+	for (int i = 0;i <=99;i++)
+	{
+		int m=map[i];
+		if (m!=83)
+		{
+			map[i]='-';
+		}
+		
+	}
+	int n=0;
+	for(int i=0;i<=99;i++)
+	{
+		int m=map[i];
+		if(m==83)
+		{
+			n=n+1;
+		}
+	}
+	if((n<20)||(n>20))
+	{
+		printf("wrong input , please enter valid value!\n");
+		if(AorB=='A')
+		{
+			enter_ship(ship_m , ship_s , ship_g , 'A');
+		}
+		if(AorB=='B')
+		{
+			enter_ship(ship_m , ship_s , ship_g , 'B');
+		}
+		
+	}
+
+}
+
+
+
+
+void show_map(char A_map[100] , char B_map[100])
+{
+	for(int j=0;j<=9;j++)
+	{
+		for(int i=(j*10);i<=((j*10)+9);i++)
+		{
+			printf(" %c " , A_map[i]);
+		}
+		printf("  ||  ");
+		for(int i=(j*10);i<=((j*10)+9);i++)
+		{
+			int m=B_map[i];
+			if(m==83)
+			{
+				printf(" - ");
+			}
+			else
+			{
+				printf(" %c " , B_map[i]);
+			}
+		}
+		printf("\n");
+	}
+}
+
+
+int is_bomb_hit(char map[100] , int bomb)
+{
+	int m=map[bomb];
+	int bomb_hit=0;
+	if(m==83)
+	{
+		map[bomb]='X';
+		bomb_hit=1;
+	}
+	else if(m==88)
+	{
+		printf("dublicate entry!\n");
+	}
+	else
+	{
+		map[bomb]='O';
+	}
+	
+	return bomb_hit;
+}
+
+
+int normal(char A_map[100])
+{
+	int bomb;
+	int j=0;
+	int x[20];
+	int r=rand()%3;
+	if(r==0)
+	{
+		for(int i=0;i<=99;i++)
+		{
+			int m=A_map[i];
+			if(m==83)
+			{
+				x[j]=i;	
+				j+=1;
+			}
+		}
+		int t=rand()%20;
+		bomb=x[t];
+	}
+	if((r==1)||(r==2))
+	{
+		bomb=rand()%100;
+	}
+	return bomb;
+}
+
+
+
+int hard(char A_map[100])
+{
+	int bomb;
+	int j=0;
+	int x[20];
+	int r=rand()%3;
+	if((r==0)||(r==1))
+	{
+		for(int i=0;i<=99;i++)
+		{
+			int m=A_map[i];
+			if(m==83)
+			{
+				x[j]=i;	
+				j+=1;
+			}
+		}
+		int t=rand()%20;
+		bomb=x[t];
+	}
+	if(r==2)
+	{
+		bomb=rand()%100;
+	}
+	return bomb;
+}
+
+
+
+int unbeatable(char A_map[100])
+{
+	int bomb;
+	int j=0;
+	int x[20];
+	for(int i=0;i<=99;i++)
+	{
+		int m=A_map[i];
+		if(m==83)
+		{
+			x[j]=i;	
+			j+=1;
+		}
+	}
+	int t=rand()%20;
+	bomb=x[t];
+
+	return bomb;
+}
+
+
+
+void get_bomb(char A_map[100] , char B_map[100] , char level[12])
+{
+	char AorB[]="A";
+	srand(time(0));
+	while(1)
+	{
+		int end_game_A=0 , end_game_B=0;
+		int bomb;
+		int bomb_hit;
+		printf("\n");
+		show_map(A_map , B_map);
+		printf("\nplayer %c turn:\n" , AorB[0]);
+		if(strcmp(AorB , "A") ==0)
+		{
+			scanf("%d" , &bomb);
+			bomb_hit=is_bomb_hit(B_map , bomb);
+		}
+		if(strcmp(AorB , "B") ==0)
+		{
+			/*if(strcmp(level , "easy") == 0)
+			{
+				bomb=(rand()%100);
+
+			}*/
+		    if(strcmp(level , "normal") == 0)
+			{	
+				bomb=normal(A_map);
+			
+			}
+			if(strcmp(level , "hard") == 0)
+			{
+				bomb=hard(A_map);
+			
+			}
+			if(strcmp(level , "unbeatable") == 0)
+			{
+				bomb=unbeatable(A_map);
+				
+			}
+			bomb_hit=is_bomb_hit(A_map , bomb);
+	    }
+		
+		if(bomb_hit==0)
+		{
+			if(strcmp(AorB , "A")==0)
+			{
+				AorB[0]= 'B';
+				continue;
+			}
+			if(strcmp(AorB , "B")==0)
+			{
+				AorB[0]= 'A';
+				continue;
+			}
+		}
+		for(int i=0;i<=99;i++)
+		{
+			int m=A_map[i];
+			if(m==83)
+			{
+				end_game_A=1;
+			}
+		}
+		for(int i=0;i<=99;i++)
+		{
+			int m=B_map[i];
+			if(m==83)
+			{
+				end_game_B=1;
+			}
+		}
+		if((end_game_A==1)&&(end_game_B==1))
+		{
+			continue;
+		}
+		else
+		{
+			break;
+		}
+	}
+}
+
+
+int score_A(char A_map[100] , int A_score)
+{
+	for(int i=0;i<=99;i++)
+	{
+		int m=A_map[i];
+		if(m==83)
+		{
+			A_score+=1;
+		}
+	}
+	return A_score;
+}
+
+
+
+int score_B(char B_map[100] , int B_score)
+{
+	for(int i=0;i<=99;i++)
+	{
+		int m=B_map[i];
+		if(m==83)
+		{
+			B_score+=1;
+		}
+	}
+	return B_score;
+}
+
+
+
+char result(int A_score , int B_score)
+{
+	char  A , B;
+	if(A_score>B_score)
+	{
+		return 'A';
+	}
+	if(A_score<B_score)
+	{
+		return 'B';
+	}
+}
+
+
+
+int check_level(char level[12] , int error)
+{
+	if((strcmp(level , "easy")==0)||(strcmp(level , "normal")==0)||(strcmp(level , "hard")==0)||(strcmp(level , "unbeatable")==0))
+	{
+		error=0;
+	}
+	else
+	{
+		printf("wrong input, please enter valid value!\n");
+		error=1;
+	}
+	return error;
+}
+
+
+int main()
+{
+	int A_score=0 , B_score =0;
+	char A_map[100];
+	char B_map[100];
+	int A_ship_m[10]; /*mokhtasat*/
+	int A_ship_s[10]; /*size*/
+	char A_ship_g[10]; /*gahat*/
+    int B_ship_m[10];
+	int B_ship_s[10];
+	char B_ship_g[10];
+
+	while(1)
+	{
+		printf("menu:\n");
+		char game_mode[12];
+		char level[12];
+		printf("1/start_round\n");
+		printf("2/exit\n");
+		printf("enter youe choise: ");
+		scanf("%s" , &game_mode);
+	
+		if(strcmp(game_mode , "start_round") == 0)
+		{
+			while(1)
+			{
+				int error=0;
+				printf("enter level:\n");
+				printf("1/easy\n");
+				printf("2/normal\n");
+				printf("3/hard\n");
+				printf("4/unbeatable\n");
+				scanf("%s" , &level);
+				error = check_level(level , error);
+				if(error==1)
+				{
+					continue;
+				}
+				else if(error==0)
+				{
+					break;
+				}
+			}
+		
+			enter_ship(A_ship_m , A_ship_s , A_ship_g , 'A');
+			clear_map(A_map, 'A');
+			insert_ship_in_map(A_ship_m , A_ship_s , A_ship_g , A_map , 'A');
+			enter_ship(B_ship_m , B_ship_s , B_ship_g , 'B');	
+			clear_map(B_map, 'B');
+			insert_ship_in_map(B_ship_m , B_ship_s , B_ship_g , B_map , 'B');
+			get_bomb(A_map , B_map , level);
+			show_map(A_map , B_map);
+			A_score=score_A(A_map , A_score);	
+			B_score=score_B(B_map , B_score);
+		}
+		else if(strcmp(game_mode , "exit") == 0)
+		{
+			break;
+		}
+		else
+		{
+			printf("wrong input , please enter valid value!");
+			continue;
+		}
+			int r=0;
+			r+=1;
+			printf("Round %d:\n" , r);
+			printf("A_score=%d\n" , A_score);
+			printf("B_score=%d\n" , B_score);
+	}
+	
+	if(A_score==B_score)
+	{
+		printf("Draw");
+	}
+	else
+	{
+		printf("Result:%c is the winner!" , result(A_score , B_score));
+	}
+	
+	return 0;
+}
